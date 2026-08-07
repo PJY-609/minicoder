@@ -18,7 +18,15 @@ MAX_VERIFICATIONS = 4
 MAX_FILE_CHARS = 20_000
 MAX_OBSERVATION_CHARS = 4_000
 TEST_TIMEOUT = 10
-EXCLUDED_PARTS = {".git", ".env", "__pycache__", ".pytest_cache"}
+EXCLUDED_PARTS = {
+    ".git",
+    ".env",
+    "__pycache__",
+    ".pytest_cache",
+    "interaction_history.jsonl",
+    "run_output.txt",
+}
+DEFAULT_TRANSCRIPT = "interaction_history.jsonl"
 
 SYSTEM_PROMPT = """Reply with exactly one JSON object and no markdown fences.
 You are solving one HumanEval task. Work in this order:
@@ -263,8 +271,12 @@ def run_agent(task: str, llm: Any, repo_root: Path, transcript_path: Optional[Pa
 
 
 def main() -> None:
-    transcript = os.getenv("TRANSCRIPT_PATH")
-    run_agent(TASK_PROMPT, build_llm(), Path(__file__).parent, Path(transcript) if transcript else None)
+    repo_root = Path(__file__).parent
+    transcript = Path(os.getenv("TRANSCRIPT_PATH", DEFAULT_TRANSCRIPT))
+    if not transcript.is_absolute():
+        transcript = repo_root / transcript
+    transcript.write_text("", encoding="utf-8")
+    run_agent(TASK_PROMPT, build_llm(), repo_root, transcript)
 
 
 

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+import agent
 from agent import ScriptedLLM, execute_action, initial_state, run_agent, run_tests
 
 
@@ -48,3 +49,21 @@ def test_finish_requires_a_passing_verification(tmp_path):
     state = initial_state("solve task")
     with pytest.raises(ValueError, match="tests must pass"):
         execute_action({"action": "finish"}, tmp_path, state)
+
+
+def test_main_replaces_the_configured_transcript(monkeypatch, tmp_path):
+    transcript = tmp_path / "history.jsonl"
+    transcript.write_text("old run\n", encoding="utf-8")
+    captured = {}
+
+    monkeypatch.setenv("TRANSCRIPT_PATH", str(transcript))
+    monkeypatch.setattr(agent, "build_llm", lambda: object())
+
+    def fake_run_agent(task, llm, repo_root, transcript_path):
+        captured["transcript"] = transcript_path
+        assert transcript_path.read_text(encoding="utf-8") == ""
+
+    monkeypatch.setattr(agent, "run_agent", fake_run_agent)
+    agent.main()
+
+    assert captured["transcript"] == transcript

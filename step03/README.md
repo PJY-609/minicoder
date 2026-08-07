@@ -1,4 +1,17 @@
-# 09 - Final: Solve a HumanEval Task
+# 03 — Build a Verify-and-Revise Coding Agent
+
+## Copilot job
+
+Give GitHub Copilot this instruction:
+
+> Follow `step03/README.md`, complete the required job, and report the result
+> plus the LLM/environment interaction history saved in
+> `step03/interaction_history.jsonl`.
+
+Copilot must run the existing agent rather than solve `task.py` itself. It must
+not create `solution.py` by hand, weaken tests, reveal the API key, or claim
+success without a passing verification. If a required command fails, it must
+stop and report the command and sanitized error.
 
 This final exercise uses **HumanEval/20**, `find_closest_elements`. The task is
 moderately challenging: a correct implementation must compare the whole list,
@@ -51,18 +64,18 @@ This step always uses a cloud model (e.g. DeepSeek) through OpenRouter — the
 same backend as step02 — since the agent loop needs a stronger model than a
 tiny local one to reliably converge on a passing solution.
 
-## Virtual Environment Setup (required)
+## Prerequisite check
 
-Create a dedicated virtual environment for this task in `minicoder/step03`.
-Prefer one independent `.venv` per step folder so each task keeps its own
-dependencies isolated.
-
-Run from this folder: `minicoder/step03`.
+Complete [../SETUP.md](../SETUP.md) and the OpenRouter configuration described
+in step02. Then run from `minicoder/step03`:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python --version
+.venv/bin/python -c "from pathlib import Path; from dotenv import dotenv_values; c=dotenv_values(Path('..')/'.env'); assert c.get('OPENROUTER_API_KEY'), 'OPENROUTER_API_KEY is blank'; assert c.get('OPENROUTER_MODEL'), 'OPENROUTER_MODEL is blank'; print('OpenRouter configuration present')"
 ```
+
+On Windows, replace `.venv/bin/python` with `.venv\Scripts\python.exe`.
+The configuration check must never print either value. Stop if a check fails.
 
 ## Testing
 
@@ -72,22 +85,40 @@ Run the deterministic agent tests first (fake LLM, no live model call):
 .venv/bin/python -m pytest -q test_agent.py
 ```
 
-## Run The Milestone Script
+## Required job and evidence
 
-Configure the OpenRouter backend in the shared `.env` file (created in step01,
-located at `minicoder/.env`):
-
-- `OPENROUTER_API_KEY=<your key>`
-- `OPENROUTER_MODEL=<exact model slug from openrouter.ai/models>`
-
-Then run the live agent from this directory:
+Run the live agent and save its console output. The agent automatically
+replaces `interaction_history.jsonl` with a fresh structured transcript:
 
 ```bash
-.venv/bin/python agent.py
+.venv/bin/python agent.py > run_output.txt
 ```
 
-If your sandbox shell injects proxy variables, run with proxies unset:
+On macOS or Linux, if your sandbox shell injects proxy variables, run with
+proxies unset:
 
 ```bash
-env -u ALL_PROXY -u all_proxy -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy .venv/bin/python agent.py
+env -u ALL_PROXY -u all_proxy -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy .venv/bin/python agent.py > run_output.txt
 ```
+
+Inspect, but do not edit, these generated files:
+
+- `run_output.txt`: human-readable actions and observations;
+- `interaction_history.jsonl`: one JSON record per model/environment event;
+- `solution.py`: code proposed by the model through `verify(code)`.
+
+Confirm that the last transcript record has `status` equal to `passed`, then
+run `.venv/bin/python tests.py` once independently. If the agent ends with
+`failed`, `model_error`, or `budget_exhausted`, report that status and the last
+sanitized observation; do not repair the solution manually.
+
+Completion means:
+
+- the deterministic agent tests passed;
+- the live agent finished with transcript status `passed`;
+- the independent `tests.py` run passed; and
+- all three evidence files exist.
+
+Report the model slug, final status, verification-attempt count, final test
+output, and a concise round-by-round summary from the transcript. Never report
+the API key.

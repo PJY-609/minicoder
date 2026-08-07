@@ -13,6 +13,18 @@ verify-and-revise agent loop.
 
 Start with [SETUP.md](SETUP.md) before opening `step01/README.md`.
 
+The intended GitHub Copilot workflow is:
+
+1. Ask Copilot to follow `SETUP.md`. Do not start an exercise unless setup
+   reports that every prerequisite passed.
+2. Ask Copilot to follow one step's `README.md`, complete its required job,
+   and report the saved evidence file.
+3. When the workshop is over, ask Copilot to follow [CLEAR.md](CLEAR.md).
+
+Each document contains explicit stop conditions. If a prerequisite or live
+model call fails, Copilot should report the exact command and error and stop;
+it should not replace the required tool, model, or environment.
+
 ## Configuration
 
 All three steps read a single shared `.env` file at the repository root (created
@@ -37,11 +49,13 @@ Never commit `.env` or paste an API key into chat or source code.
 
 ## Virtual environments
 
-Each step keeps its own independent `.venv` (see each step's README). Do not
-share one virtual environment across steps.
+Each step keeps its own independent `.venv`. `SETUP.md` creates and validates
+all three before the exercises begin. Do not share one virtual environment
+across steps.
 
 ## Ground rules
 
 - Read the code before asking a coding assistant to change it.
 - Run the deterministic test before trying a live model.
 - Never paste an API key into source code or a prompt.
+- Do not commit generated output, transcripts, solutions, or `.env`.

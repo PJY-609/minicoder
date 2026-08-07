@@ -13,3 +13,10 @@ __pycache__/
 */.pytest_cache/
 */*/.pytest_cache/
 *.pyc
+
+# Generated workshop evidence and solutions
+step01/llm_output.txt
+step02/llm_output.txt
+step03/run_output.txt
+step03/interaction_history.jsonl
+step03/solution.py

@@ -70,11 +70,12 @@ Complete [../SETUP.md](../SETUP.md) and the OpenRouter configuration described
 in step02. Then run from `minicoder/step03`:
 
 ```bash
-.venv/bin/python --version
-.venv/bin/python -c "from pathlib import Path; from dotenv import dotenv_values; c=dotenv_values(Path('..')/'.env'); assert c.get('OPENROUTER_API_KEY'), 'OPENROUTER_API_KEY is blank'; assert c.get('OPENROUTER_MODEL'), 'OPENROUTER_MODEL is blank'; print('OpenRouter configuration present')"
+../.venv/bin/python --version
+../.venv/bin/python -c "from pathlib import Path; from dotenv import dotenv_values; c=dotenv_values(Path('..')/'.env'); assert c.get('OPENROUTER_API_KEY'), 'OPENROUTER_API_KEY is blank'; assert c.get('OPENROUTER_MODEL'), 'OPENROUTER_MODEL is blank'; print('OpenRouter configuration present')"
 ```
 
-On Windows, replace `.venv/bin/python` with `.venv\Scripts\python.exe`.
+On Windows, replace `../.venv/bin/python` with
+`..\.venv\Scripts\python.exe`.
 The configuration check must never print either value. Stop if a check fails.
 
 ## Testing
@@ -82,7 +83,7 @@ The configuration check must never print either value. Stop if a check fails.
 Run the deterministic agent tests first (fake LLM, no live model call):
 
 ```bash
-.venv/bin/python -m pytest -q test_agent.py
+../.venv/bin/python -m pytest -q test_agent.py
 ```
 
 ## Required job and evidence
@@ -91,14 +92,14 @@ Run the live agent and save its console output. The agent automatically
 replaces `interaction_history.jsonl` with a fresh structured transcript:
 
 ```bash
-.venv/bin/python agent.py > run_output.txt
+../.venv/bin/python agent.py > run_output.txt
 ```
 
 On macOS or Linux, if your sandbox shell injects proxy variables, run with
 proxies unset:
 
 ```bash
-env -u ALL_PROXY -u all_proxy -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy .venv/bin/python agent.py > run_output.txt
+env -u ALL_PROXY -u all_proxy -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy ../.venv/bin/python agent.py > run_output.txt
 ```
 
 Inspect, but do not edit, these generated files:
@@ -108,7 +109,7 @@ Inspect, but do not edit, these generated files:
 - `solution.py`: code proposed by the model through `verify(code)`.
 
 Confirm that the last transcript record has `status` equal to `passed`, then
-run `.venv/bin/python tests.py` once independently. If the agent ends with
+run `../.venv/bin/python tests.py` once independently. If the agent ends with
 `failed`, `model_error`, or `budget_exhausted`, report that status and the last
 sanitized observation; do not repair the solution manually.
 

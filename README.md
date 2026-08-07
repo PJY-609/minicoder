@@ -28,7 +28,7 @@ it should not replace the required tool, model, or environment.
 ## Configuration
 
 All three steps read a single shared `.env` file at the repository root (created
-during step01 setup from [.env.example](.env.example)). It governs the whole
+by `setup.py` from [.env.example](.env.example)). It governs the whole
 project:
 
 ```dotenv
@@ -49,9 +49,9 @@ Never commit `.env` or paste an API key into chat or source code.
 
 ## Virtual environments
 
-Each step keeps its own independent `.venv`. `SETUP.md` creates and validates
-all three before the exercises begin. Do not share one virtual environment
-across steps.
+The repository uses one root `.venv` containing the pinned dependencies shared
+by all three steps. `SETUP.md` creates it transactionally and validates every
+exercise before the workshop begins.
 
 ## Ground rules
 

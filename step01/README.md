@@ -35,11 +35,12 @@ Default local settings used by `agent.py`:
 Complete [../SETUP.md](../SETUP.md) first. Then run from `minicoder/step01`:
 
 ```bash
-.venv/bin/python --version
+../.venv/bin/python --version
 ollama list
 ```
 
-On Windows, replace `.venv/bin/python` with `.venv\Scripts\python.exe`.
+On Windows, replace `../.venv/bin/python` with
+`..\.venv\Scripts\python.exe`.
 If either check fails or `qwen3:0.6b` is not listed, stop and report the issue.
 
 ## Testing
@@ -47,13 +48,21 @@ If either check fails or `qwen3:0.6b` is not listed, stop and report the issue.
 Deterministic unit test (fake client, no live model call):
 
 ```bash
-.venv/bin/python -m pytest -q test_agent.py
+../.venv/bin/python -m pytest -q test_agent.py
 ```
 
 Live local-Ollama test (non-deterministic content):
 
 ```bash
-RUN_LIVE_OLLAMA_TEST=1 .venv/bin/python -m pytest -q test_agent.py
+RUN_LIVE_OLLAMA_TEST=1 ../.venv/bin/python -m pytest -q test_agent.py
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:RUN_LIVE_OLLAMA_TEST = "1"
+..\.venv\Scripts\python.exe -m pytest -q test_agent.py
+Remove-Item Env:RUN_LIVE_OLLAMA_TEST
 ```
 
 The live assertion only checks that a non-empty string is returned from the
@@ -64,7 +73,7 @@ LLM, not exact wording.
 Run the live script and save its complete stdout:
 
 ```bash
-.venv/bin/python agent.py > llm_output.txt
+../.venv/bin/python agent.py > llm_output.txt
 ```
 
 Open `llm_output.txt` and confirm that it contains `UNDERSTAND`, the question,

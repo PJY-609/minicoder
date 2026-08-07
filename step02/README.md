@@ -40,11 +40,12 @@ root `.env` without showing them in chat:
 Then run from `minicoder/step02`:
 
 ```bash
-.venv/bin/python --version
-.venv/bin/python -c "from pathlib import Path; from dotenv import dotenv_values; c=dotenv_values(Path('..')/'.env'); assert c.get('OPENROUTER_API_KEY'), 'OPENROUTER_API_KEY is blank'; assert c.get('OPENROUTER_MODEL'), 'OPENROUTER_MODEL is blank'; print('OpenRouter configuration present')"
+../.venv/bin/python --version
+../.venv/bin/python -c "from pathlib import Path; from dotenv import dotenv_values; c=dotenv_values(Path('..')/'.env'); assert c.get('OPENROUTER_API_KEY'), 'OPENROUTER_API_KEY is blank'; assert c.get('OPENROUTER_MODEL'), 'OPENROUTER_MODEL is blank'; print('OpenRouter configuration present')"
 ```
 
-On Windows, replace `.venv/bin/python` with `.venv\Scripts\python.exe`.
+On Windows, replace `../.venv/bin/python` with
+`..\.venv\Scripts\python.exe`.
 This check reports only whether values exist; it must never print them. Stop if
 either check fails.
 
@@ -53,7 +54,7 @@ either check fails.
 Deterministic unit tests (fake LLM, no live model call):
 
 ```bash
-.venv/bin/python -m pytest -q test_agent.py
+../.venv/bin/python -m pytest -q test_agent.py
 ```
 
 ## Required job and evidence
@@ -62,7 +63,7 @@ Get a key at https://openrouter.ai/keys and an exact supported model slug at
 https://openrouter.ai/models. Run the live script and save its complete stdout:
 
 ```bash
-.venv/bin/python agent.py > llm_output.txt
+../.venv/bin/python agent.py > llm_output.txt
 ```
 
 The script prints the question and the model's answer.
@@ -71,7 +72,7 @@ On macOS or Linux, if your sandbox shell injects proxy variables, run with
 proxies unset:
 
 ```bash
-env -u ALL_PROXY -u all_proxy -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy .venv/bin/python agent.py > llm_output.txt
+env -u ALL_PROXY -u all_proxy -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy ../.venv/bin/python agent.py > llm_output.txt
 ```
 
 Open `llm_output.txt` and confirm that it contains `UNDERSTAND`, the question,

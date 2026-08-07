@@ -17,7 +17,8 @@ On Windows, use `py -3 clear.py --dry-run`. Review the list before continuing.
 The cleaner may remove only:
 
 - the root `.env` secret file;
-- the three step-local `.venv` directories;
+- the root `.venv`, any incomplete `.venv.tmp` or `.venv.backup`, and legacy
+  step-local environments from older workshop versions;
 - Python and pytest caches;
 - `step01/llm_output.txt` and `step02/llm_output.txt`;
 - `step03/run_output.txt`, `interaction_history.jsonl`, and generated

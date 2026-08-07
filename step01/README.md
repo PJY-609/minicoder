@@ -1,5 +1,9 @@
 # 01 — Call an LLM
 
+Begin this exercise only when the user explicitly asks to run step01. A
+successful setup run by itself is not permission to open or execute this
+exercise.
+
 ## Copilot job
 
 Give GitHub Copilot this instruction:

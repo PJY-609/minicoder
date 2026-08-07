@@ -11,7 +11,9 @@ verify-and-revise agent loop.
 | [step02](step02/README.md) | Ask a cloud model directly | OpenRouter (cloud) |
 | [step03](step03/README.md) | Search, plan, and verify-and-revise until tests pass | OpenRouter (cloud) |
 
-Start with [SETUP.md](SETUP.md) before opening `step01/README.md`.
+Start with [SETUP.md](SETUP.md). Completing setup is a stopping point: report
+the result and wait. Do not open, inspect, or run `step01` until the user
+explicitly asks to begin it.
 
 The intended GitHub Copilot workflow is:
 

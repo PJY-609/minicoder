@@ -132,15 +132,20 @@ def check_ollama() -> None:
         )
 
 
-def preflight() -> None:
+def local_preflight() -> None:
     print("PREFLIGHT: Python", flush=True)
     check_python()
     print("PREFLIGHT: disk space", flush=True)
     check_disk_space()
-    print("PREFLIGHT: PyPI connectivity", flush=True)
-    check_pypi()
     print("PREFLIGHT: Ollama", flush=True)
     check_ollama()
+
+
+def diagnostic_preflight() -> None:
+    """Run every read-only diagnostic, including optional network probing."""
+    local_preflight()
+    print("PREFLIGHT: PyPI connectivity", flush=True)
+    check_pypi()
     print("PREFLIGHT OK", flush=True)
 
 
@@ -177,20 +182,16 @@ def create_env_file() -> None:
     print("CREATE: .env from .env.example", flush=True)
 
 
-def install(*, repair: bool) -> None:
-    preflight()
+def install(*, force_rebuild: bool) -> None:
+    local_preflight()
+    print("PREFLIGHT OK", flush=True)
     if ENVIRONMENT.exists():
-        if existing_environment_is_valid():
+        if existing_environment_is_valid() and not force_rebuild:
             print("ENVIRONMENT OK: existing .venv", flush=True)
             create_env_file()
             print(f"SETUP COMPLETE: Python {sys.version.split()[0]}", flush=True)
             return
-        if not repair:
-            raise SetupBlocked(
-                "BROKEN_ENVIRONMENT",
-                "The existing .venv did not pass validation.",
-                ["Run setup again with `python setup.py --repair`."],
-            )
+        print("REBUILD: existing .venv will be replaced after validation", flush=True)
 
     if TEMP_ENVIRONMENT.exists():
         shutil.rmtree(TEMP_ENVIRONMENT)
@@ -201,7 +202,7 @@ def install(*, repair: bool) -> None:
             BACKUP_ENVIRONMENT.replace(ENVIRONMENT)
     try:
         build_environment()
-        if repair and ENVIRONMENT.exists():
+        if ENVIRONMENT.exists():
             ENVIRONMENT.replace(BACKUP_ENVIRONMENT)
         try:
             TEMP_ENVIRONMENT.replace(ENVIRONMENT)
@@ -235,15 +236,17 @@ def main() -> int:
         "--check", action="store_true", help="run read-only prerequisite checks only"
     )
     parser.add_argument(
-        "--repair", action="store_true", help="replace an existing invalid .venv"
+        "--repair",
+        action="store_true",
+        help="force a transactional rebuild (invalid environments rebuild automatically)",
     )
     args = parser.parse_args()
     try:
         if args.check:
-            preflight()
+            diagnostic_preflight()
             print(f"CHECK COMPLETE: Python {sys.version.split()[0]}")
         else:
-            install(repair=args.repair)
+            install(force_rebuild=args.repair)
     except SetupBlocked as error:
         print_blocked(error)
         return 1

@@ -1,0 +1,15 @@
+# Secrets — never commit
+.env
+
+# Per-step virtual environments
+.venv/
+*/.venv/
+
+# Python cache
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+.pytest_cache/
+*/.pytest_cache/
+*/*/.pytest_cache/
+*.pyc

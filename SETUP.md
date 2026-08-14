@@ -45,10 +45,8 @@ The setup program works in two phases.
 
 First, it performs local preflight checks for:
 
-- Python 3.11 or 3.12 with `venv` and `pip` support;
-- at least 1 GB of free disk space;
-- an installed and running Ollama service; and
-- the local Ollama model `qwen3:0.6b`.
+- Python 3.11 or 3.12 with `venv` and `pip` support; and
+- at least 1 GB of free disk space.
 
 Only after every preflight passes does it:
 
@@ -56,13 +54,18 @@ Only after every preflight passes does it:
 2. install the pinned packages in `requirements.txt`;
 3. verify all required imports;
 4. run the deterministic tests for steps 01, 02, and 03;
-5. rename the validated environment to `.venv`; and
-6. copy `.env.example` to `.env` if `.env` does not already exist.
+5. rename the validated environment to `.venv`;
+6. copy `.env.example` to `.env` if `.env` does not already exist; and
+7. check for an installed and running Ollama service with the local model
+   `qwen3:0.6b`.
 
-If an existing `.venv` is invalid, setup rebuilds it automatically. If
-environment creation, installation, imports, or tests fail, `.venv.tmp` is
-removed automatically and the previous `.venv` is preserved. A partial
-environment is never promoted, and an existing `.env` is never overwritten.
+The Python environment is installed regardless of whether Ollama is present;
+the Ollama check runs last so a missing or unavailable Ollama does not block
+building the project-local `.venv`. If an existing `.venv` is invalid, setup
+rebuilds it automatically. If environment creation, installation, imports, or
+tests fail, `.venv.tmp` is removed automatically and the previous `.venv` is
+preserved. A partial environment is never promoted, and an existing `.env` is
+never overwritten.
 
 Setup does not reject the network based on a separate connectivity probe.
 When packages are needed, `pip` makes the authoritative attempt and reports
@@ -82,6 +85,18 @@ The only successful final message is:
 ```text
 SETUP COMPLETE: Python 3.12.x
 ```
+
+If the Python environment builds and validates but Ollama is missing,
+unreachable, or lacks `qwen3:0.6b`, setup still keeps the validated `.venv`
+and `.env`, then reports a distinct final message instead of failing:
+
+```text
+SETUP MISSING OLLAMA: <code>
+```
+
+Report this result and stop; it means the Python environment is ready but
+Ollama still needs a human/system fix (see the codes below) before step01 can
+run models.
 
 The agent should inspect complete command output, make safe project-local
 corrections, and retry when appropriate. It may choose how to create or repair

@@ -19,6 +19,7 @@ ENV_EXAMPLE = ROOT / ".env.example"
 ENV_FILE = ROOT / ".env"
 MODEL = "qwen3:0.6b"
 MIN_FREE_BYTES = 1_000_000_000
+OLLAMA_CODES = {"OLLAMA_NOT_INSTALLED", "OLLAMA_UNAVAILABLE", "OLLAMA_MODEL_MISSING"}
 IMPORTS = ("dotenv", "httpx", "ollama", "pytest")
 TESTS = (
     (ROOT / "step01", "test_agent.py"),
@@ -137,8 +138,6 @@ def local_preflight() -> None:
     check_python()
     print("PREFLIGHT: disk space", flush=True)
     check_disk_space()
-    print("PREFLIGHT: Ollama", flush=True)
-    check_ollama()
 
 
 def diagnostic_preflight() -> None:
@@ -146,6 +145,8 @@ def diagnostic_preflight() -> None:
     local_preflight()
     print("PREFLIGHT: PyPI connectivity", flush=True)
     check_pypi()
+    print("PREFLIGHT: Ollama", flush=True)
+    check_ollama()
     print("PREFLIGHT OK", flush=True)
 
 
@@ -182,15 +183,32 @@ def create_env_file() -> None:
     print("CREATE: .env from .env.example", flush=True)
 
 
-def install(*, force_rebuild: bool) -> None:
+def report_ollama(error: SetupBlocked) -> None:
+    print(f"SETUP MISSING OLLAMA: {error.code}", flush=True)
+    print(error.detail, flush=True)
+    print("The project-local Python environment is installed and validated.", flush=True)
+    print("Try:", flush=True)
+    for number, action in enumerate(error.actions, 1):
+        print(f"{number}. {action}", flush=True)
+
+
+def install(*, force_rebuild: bool) -> str:
     local_preflight()
     print("PREFLIGHT OK", flush=True)
     if ENVIRONMENT.exists():
         if existing_environment_is_valid() and not force_rebuild:
             print("ENVIRONMENT OK: existing .venv", flush=True)
             create_env_file()
+            print("PREFLIGHT: Ollama", flush=True)
+            try:
+                check_ollama()
+            except SetupBlocked as error:
+                if error.code not in OLLAMA_CODES:
+                    raise
+                report_ollama(error)
+                return "MISSING_OLLAMA"
             print(f"SETUP COMPLETE: Python {sys.version.split()[0]}", flush=True)
-            return
+            return "COMPLETE"
         print("REBUILD: existing .venv will be replaced after validation", flush=True)
 
     if TEMP_ENVIRONMENT.exists():
@@ -218,7 +236,16 @@ def install(*, force_rebuild: bool) -> None:
         raise
 
     create_env_file()
+    print("PREFLIGHT: Ollama", flush=True)
+    try:
+        check_ollama()
+    except SetupBlocked as error:
+        if error.code not in OLLAMA_CODES:
+            raise
+        report_ollama(error)
+        return "MISSING_OLLAMA"
     print(f"SETUP COMPLETE: Python {sys.version.split()[0]}", flush=True)
+    return "COMPLETE"
 
 
 def print_blocked(error: SetupBlocked) -> None:
@@ -246,7 +273,9 @@ def main() -> int:
             diagnostic_preflight()
             print(f"CHECK COMPLETE: Python {sys.version.split()[0]}")
         else:
-            install(force_rebuild=args.repair)
+            status = install(force_rebuild=args.repair)
+            if status == "MISSING_OLLAMA":
+                return 2
     except SetupBlocked as error:
         print_blocked(error)
         return 1
